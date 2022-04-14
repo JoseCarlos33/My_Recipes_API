@@ -6,12 +6,17 @@ from . import models
 class UserProfileType(DjangoObjectType):
     class Meta:
         model = models.UserProfile
-        fields = ('id', 'email', 'name')
+        fields = "__all__"
+
+class TagType(DjangoObjectType):
+    class Meta:
+        model = models.Tag
+        fields = "__all__"
 
 class RecipeType(DjangoObjectType):
     class Meta:
         model = models.Recipe
-        fields = ("user", "id", "title", "ingredients")
+        fields = "__all__"
 
 class Query(graphene.ObjectType):
     all_recipes = graphene.List(RecipeType)

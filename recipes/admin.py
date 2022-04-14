@@ -13,5 +13,12 @@ class Recipe(admin.ModelAdmin):
     search_fields = ('user', 'title')
     list_per_page = 10
 
+class Tag(admin.ModelAdmin):
+    list_display = ('id', 'name')
+    list_display_links = ('id', 'name')
+    search_fields = ('name',)
+    list_per_page = 10
+
 admin.site.register(models.UserProfile, User)
 admin.site.register(models.Recipe, Recipe)
+admin.site.register(models.Tag, Tag)
