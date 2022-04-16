@@ -2,9 +2,9 @@ from django.contrib import admin
 from . import models
 
 class User(admin.ModelAdmin):
-    list_display = ('id','name', 'email')
-    list_display_links = ('id', 'name')
-    search_fields = ('name','email', 'id')
+    list_display = ('id','username', 'email')
+    list_display_links = ('id', 'username')
+    search_fields = ('username','email', 'id')
     list_per_page = 10
 
 class Recipe(admin.ModelAdmin):

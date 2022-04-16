@@ -1,46 +1,25 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
-from django.contrib.auth.models import BaseUserManager
+from django.contrib.auth.models import UserManager
 from django.utils import timezone
 from datetime import datetime
-
-class UserProfileManager(BaseUserManager):
-    def _create_user(self, email, password, is_staff, is_superuser, **extra_fields):
-        now = timezone.now()
-
-        if not email:
-            raise ValueError('Users must have an email address')
-        email = self.normalize_email(email)
-        user = self.model(email=email,
-                          is_staff=is_staff, is_active=True,
-                          is_superuser=is_superuser,
-                          last_login=now, **extra_fields)
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
-
-    def create_user(self, email, password=None, **extra_fields):
-        return self._create_user(email, password, False, False,
-                                 **extra_fields)
-
-    def create_superuser(self, email, password, **extra_fields):
-        return self._create_user(email, password, True, True,
-                                 **extra_fields)
-
 
 class UserProfile(AbstractBaseUser, PermissionsMixin):
 
     email = models.EmailField(max_length=255, unique=True)
-    name = models.CharField(max_length=255)
+    username = models.CharField(max_length=200)
+    first_name = models.CharField(max_length=200, default=username, blank=True)
+    last_name = models.CharField(max_length=200, default="", blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
-    objects = UserProfileManager()
-
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name']
+    EMAIL_FIELD='email'
+    REQUIRED_FIELDS = ['username']
 
+    objects = UserManager()
+    
     def __str__(self):
       return self.email
 
@@ -54,7 +33,7 @@ class Recipe(models.Model):
     
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
-    tag = models.ManyToManyField(Tag, blank=True, null=True)
+    tag = models.ManyToManyField(Tag, blank=True)
     ingredients = models.CharField(max_length=1000)
     preparation_method = models.CharField(max_length=200)
     public = models.BooleanField(default=False)
