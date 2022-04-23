@@ -1,15 +1,7 @@
-# cookbook/schema.py
-from atexit import register
+# recipes/schema.py
 import graphene
 from graphene_django import DjangoObjectType
 from . import models
-from graphql_auth import mutations 
-from graphql_auth.schema import UserQuery, MeQuery
-
-class UserProfileType(DjangoObjectType):
-    class Meta:
-        model = models.UserProfile
-        fields = "__all__"
 
 class TagType(DjangoObjectType):
     class Meta:
@@ -21,27 +13,17 @@ class RecipeType(DjangoObjectType):
         model = models.Recipe
         fields = "__all__"
 
-class AuthMutation(graphene.ObjectType):
-    register = mutations.Register.Field()
-    verify_account = mutations.VerifyAccount.Field()
-    token_auth = mutations.ObtainJSONWebToken.Field()
-    resend_activation_email = mutations.ResendActivationEmail.Field()
-    send_password_reset_email = mutations.SendPasswordResetEmail.Field()
-    password_reset = mutations.PasswordReset.Field()
-
-class Query(UserQuery, graphene.ObjectType):
+class Query(graphene.ObjectType):
     all_recipes = graphene.List(RecipeType)
     public_recipes = graphene.List(RecipeType)
-    my_profile = graphene.Field(UserProfileType, id=graphene.String(required=True))
 
     def resolve_public_recipes(root, info):
         return models.Recipe.objects.filter(public=True)
 
     def resolve_all_recipes(root, info):
         return models.Recipe.objects.all()
+
     
 
-class Mutation(AuthMutation, graphene.ObjectType):
+class Mutation(graphene.ObjectType):
     pass
-
-schema = graphene.Schema(query=Query, mutation=Mutation)
