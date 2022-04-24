@@ -90,15 +90,38 @@ class UpdateUser(graphene.Mutation):
 
         return UpdateUser(user=user)
 
+class ChangePassword(graphene.Mutation):
+    class Arguments:
+        old_password = graphene.String()
+        new_password = graphene.String()
+        confirm_password = graphene.String()
+        
+    user = graphene.Field(UserProfileType)
+
+    @authentication_classes((TokenAuthentication,))
+    def mutate(root, info, old_password, new_password, confirm_password):
+        user = logged_user(info)
+
+        if not user.check_password(old_password):
+            raise Exception("Senha atual incorreta.")
+        
+        if new_password != confirm_password:
+            raise Exception("As senhas não são iguais.")
+
+        user.set_password(new_password)
+        user.save()
+
+        return ChangePassword(user=user)
+
 class Query(
     
     graphene.ObjectType):
     pass
 
 class Mutation(
-    CreateUser, 
     graphene.ObjectType
 ):
     create_user = CreateUser.Field()
     login = Login.Field()
     update_user = UpdateUser.Field()
+    change_password = ChangePassword.Field()
