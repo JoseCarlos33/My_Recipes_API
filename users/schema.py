@@ -6,17 +6,6 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import authentication_classes
 from users.utils import logged_user
-
-class TokenAuthMiddleware:
-    def __init__(self, get_response):
-        self.auth = TokenAuthentication()
-        self.get_response = get_response
-
-    def __call__(self, request):
-        if request.META.get("HTTP_AUTHORIZATION") and not request.user.is_authenticated:
-            user = self.auth.authenticate(request)[0]
-            request.user = user
-        return self.get_response(request)
         
 class UserProfileType(DjangoObjectType):
     class Meta:
@@ -113,14 +102,15 @@ class ChangePassword(graphene.Mutation):
 
         return ChangePassword(user=user)
 
-class Query(
-    
-    graphene.ObjectType):
-    pass
+class Query(graphene.ObjectType):
+    user_profile = graphene.List(UserProfileType)
 
-class Mutation(
-    graphene.ObjectType
-):
+    @authentication_classes((TokenAuthentication,))
+    def resolve_user_profile(root, info):
+        user = logged_user(info, getProfile=True)
+        return user
+
+class Mutation(graphene.ObjectType):
     create_user = CreateUser.Field()
     login = Login.Field()
     update_user = UpdateUser.Field()

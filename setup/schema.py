@@ -13,7 +13,7 @@ class Query(
 
 class Mutation(
   users.schema.Mutation,
-  # recipes.schema.Mutation,
+  recipes.schema.Mutation,
   graphene.ObjectType
 ):
     pass
