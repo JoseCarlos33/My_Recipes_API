@@ -8,7 +8,7 @@
 
 ### Deploy
 <h3>
-  https://drf-weather-forecast-app.herokuapp.com/graphql
+  https://drf-recipes-manager.herokuapp.com/graphql
 </h3>
 
 ### Features
