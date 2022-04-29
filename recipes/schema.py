@@ -74,23 +74,47 @@ class UpdateRecipe(graphene.Mutation):
 
     @authentication_classes((TokenAuthentication),)
     def mutate(root, info, id, title, ingredients, preparation_method, public, tag):
+        user = logged_user(info)
         recipe = models.Recipe.objects.get(id=id)
-        recipe.title = title
-        recipe.ingredients = ingredients
-        recipe.preparation_method = preparation_method
-        recipe.public = public
-        recipe.save()
 
-        for t in tag:
-            tag = models.Tag.objects.filter(name=t).first()
-            if tag is not None:
-                recipe.tag.add(tag)
+        if user != recipe.user:
+            raise Exception("Você não tem permissão para editar essa receita")
+        else:
+            recipe.title = title
+            recipe.ingredients = ingredients
+            recipe.preparation_method = preparation_method
+            recipe.public = public
+            recipe.save()
 
-        recipe.save()
+            for t in tag:
+                tag = models.Tag.objects.filter(name=t).first()
+                if tag is not None:
+                    recipe.tag.add(tag)
 
-        return UpdateRecipe(recipe=recipe)
+            recipe.save()
+
+            return UpdateRecipe(recipe=recipe)
+
+class DeleteRecipe(graphene.Mutation):
+    class Arguments:
+        id = graphene.Int()
+
+    id = graphene.Int()
+
+    @authentication_classes((TokenAuthentication),)
+    def mutate(root, info, id):
+        recipe = models.Recipe.objects.get(id=id)
+        user = logged_user(info)
+
+        if user != recipe.user:
+            raise Exception("Você não tem permissão para deletar essa receita")
+        else:
+            recipe.delete()
+
+            return DeleteRecipe(id=id)
 
 class Mutation(graphene.ObjectType):
     create_recipes = CreateRecipes.Field()
     update_recipe = UpdateRecipe.Field()
+    delete_recipe = DeleteRecipe.Field()
 
