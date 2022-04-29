@@ -61,5 +61,36 @@ class CreateRecipes(graphene.Mutation):
 
         return CreateRecipes(recipe=recipe)
 
+class UpdateRecipe(graphene.Mutation):
+    class Arguments:
+        id = graphene.Int()
+        title = graphene.String()
+        ingredients = graphene.String()
+        preparation_method = graphene.String()
+        public = graphene.Boolean()
+        tag = graphene.List(graphene.String)
+
+    recipe = graphene.Field(RecipeType)
+
+    @authentication_classes((TokenAuthentication),)
+    def mutate(root, info, id, title, ingredients, preparation_method, public, tag):
+        recipe = models.Recipe.objects.get(id=id)
+        recipe.title = title
+        recipe.ingredients = ingredients
+        recipe.preparation_method = preparation_method
+        recipe.public = public
+        recipe.save()
+
+        for t in tag:
+            tag = models.Tag.objects.filter(name=t).first()
+            if tag is not None:
+                recipe.tag.add(tag)
+
+        recipe.save()
+
+        return UpdateRecipe(recipe=recipe)
+
 class Mutation(graphene.ObjectType):
     create_recipes = CreateRecipes.Field()
+    update_recipe = UpdateRecipe.Field()
+
